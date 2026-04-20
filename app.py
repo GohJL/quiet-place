@@ -28,10 +28,13 @@ locations = [
 
 
     
+@app.route("/")
+def home():
+    return "🚀 Your Render app is working!"
 # Serve frontend
 @app.route("/")
 def serve_home():
-    return send_from_directory("index.html")
+    return send_from_directory("public/index.html")
 
 # GET locations
 @app.route("/api/locations", methods=["GET"])
