@@ -26,9 +26,9 @@ locations = [
     }
 ]
 
-@app.route("/home")
+@app.route("/")
 def home():
-    return "Hello"
+    return "🚀 Your Render app is working!"
     
 # Serve frontend
 @app.route("/")
