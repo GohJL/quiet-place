@@ -1,1 +1,2 @@
+const API = "/api/locations";
 
