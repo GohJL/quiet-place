@@ -1,12 +1,11 @@
 import os 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-app = Flask(__name__, static_folder="public", static_url_path="")
+app = Flask(__name__, static_folder="public")
 CORS(app)
 
-
-# Sample data (replace with database later)
+# Sample data
 locations = [
     {
         "id": 1,
@@ -26,19 +25,16 @@ locations = [
     }
 ]
 
-
-
 # Serve frontend
 @app.route("/")
 def serve_home():
-    return send_from_directory("public/index.html")
+    return app.send_static_file("index.html")
 
-# GET locations
+# API routes
 @app.route("/api/locations", methods=["GET"])
 def get_locations():
     return jsonify(locations)
 
-# POST update
 @app.route("/api/update", methods=["POST"])
 def update_location():
     data = request.json
