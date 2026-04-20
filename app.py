@@ -1,16 +1,17 @@
-import os 
-from flask import Flask, jsonify, request
+import os
+from flask import Flask, jsonify
 from flask_cors import CORS
 
+# Create Flask app
 app = Flask(__name__, static_folder="public", static_url_path="")
 CORS(app)
 
-# Serve frontend automatically
+# Serve frontend (index.html inside /public)
 @app.route("/")
 def serve_home():
     return app.send_static_file("index.html")
 
-# API
+# API: Get locations
 @app.route("/api/locations", methods=["GET"])
 def get_locations():
     return jsonify([
@@ -24,6 +25,10 @@ def get_locations():
         }
     ])
 
-# Run
+# Run server
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000)),
+        debug=True
+    )
