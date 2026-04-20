@@ -27,10 +27,7 @@ locations = [
 ]
 
 
-    
-@app.route("/")
-def home():
-    return "🚀 Your Render app is working!"
+
 # Serve frontend
 @app.route("/")
 def serve_home():
