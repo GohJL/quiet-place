@@ -31,7 +31,7 @@ locations = [
 # Serve frontend
 @app.route("/")
 def serve_home():
-    return send_from_directory("public", "index.html")
+    return send_from_directory("index.html")
 
 # GET locations
 @app.route("/api/locations", methods=["GET"])
