@@ -1,32 +1,143 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Study Spaces Finder</title>
-    <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UBD Study Finder</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f5f7fa;
+    }
+
+    h1 {
+      color: #2c3e50;
+    }
+
+    .filters {
+      margin-bottom: 20px;
+      padding: 10px;
+      background: white;
+      border-radius: 8px;
+    }
+
+    select, button {
+      padding: 8px;
+      margin-right: 10px;
+    }
+
+    .card {
+      background: white;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .btn {
+      background: #3498db;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .btn:hover {
+      background: #2980b9;
+    }
+  </style>
 </head>
 
 <body>
 
-    <header>
-        <h1>📚 Study Space Finder</h1>
-        <p>Find the best place to study on campus</p>
-    </header>
+  <h1>📚 UBD Study Finder</h1>
 
-    <div class="container">
+  <div class="filters">
+    <label>Noise:</label>
+    <select id="noise">
+      <option value="">All</option>
+      <option value="quiet">Quiet</option>
+      <option value="moderate">Moderate</option>
+      <option value="noisy">Noisy</option>
+    </select>
 
-        <div class="card">
-            <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644" />
-            <h2>UBD Library</h2>
-            <p>Quiet • Medium crowd • Focus zone</p>
-        </div>
+    <label>Crowd:</label>
+    <select id="crowd">
+      <option value="">All</option>
+      <option value="low">Low</option>
+      <option value="medium">Medium</option>
+      <option value="high">High</option>
+    </select>
 
-        <div class="card">
-            <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24" />
-            <h2>Campus Cafe</h2>
-            <p>Moderate noise • Social vibe</p>
-        </div>
+    <button class="btn" onclick="loadLocations()">Filter</button>
+  </div>
 
-    </div>
+  <div id="locations"></div>
+
+  <script>
+    const API = "/api/locations";
+
+    async function loadLocations() {
+      const res = await fetch(API);
+      let data = await res.json();
+
+      const noise = document.getElementById("noise").value;
+      const crowd = document.getElementById("crowd").value;
+
+      if (noise) {
+        data = data.filter(l => l.noise_level === noise);
+      }
+
+      if (crowd) {
+        data = data.filter(l => l.crowd_level === crowd);
+      }
+
+      const container = document.getElementById("locations");
+      container.innerHTML = "";
+
+      data.forEach(loc => {
+        const div = document.createElement("div");
+        div.className = "card";
+
+        div.innerHTML = `
+          <h3>${loc.name}</h3>
+          <p>📍 Type: ${loc.location}</p>
+          <p>🔇 Noise: ${loc.noise_level}</p>
+          <p>👥 Crowd: ${loc.crowd_level}</p>
+          <p>🎯 Vibe: ${loc.vibe}</p>
+
+          <button class="btn" onclick="update(${loc.id})">
+            Update Info
+          </button>
+        `;
+
+        container.appendChild(div);
+      });
+    }
+
+    async function update(id) {
+      const noise = prompt("Enter noise level (quiet/moderate/noisy):");
+      const crowd = prompt("Enter crowd level (low/medium/high):");
+
+      await fetch("/api/update", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          id,
+          noise_level: noise,
+          crowd_level: crowd
+        })
+      });
+
+      loadLocations();
+    }
+
+    loadLocations();
+  </script>
 
 </body>
 </html>
