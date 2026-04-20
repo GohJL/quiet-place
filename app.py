@@ -4,6 +4,11 @@ from flask_cors import CORS
 app = Flask(__name__, static_folder="public", static_url_path="")
 CORS(app)
 
+@app.route("/")
+def home():
+    return send_from_directory("public", "index.html")
+
+
 # Sample data (replace with database later)
 locations = [
     {
