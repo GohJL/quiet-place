@@ -3,141 +3,272 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>UBD Study Finder</title>
-
+  <title>StudySpot - UBD</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  
   <style>
+    :root {
+      --primary-color: #0d684d;
+      --text-main: #1a1a1a;
+      --text-muted: #666;
+      --overlay: rgba(0, 0, 0, 0.5);
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background: #f5f7fa;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      background: #ffffff;
+      color: var(--text-main);
     }
 
-    h1 {
-      color: #2c3e50;
-    }
-
-    .filters {
-      margin-bottom: 20px;
-      padding: 10px;
+    /* --- OVERLAYS --- */
+    #login-overlay, #modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
       background: white;
-      border-radius: 8px;
+      display: flex; justify-content: center; align-items: center;
+      z-index: 1000;
     }
 
-    select, button {
-      padding: 8px;
-      margin-right: 10px;
+    #modal-overlay {
+      background: var(--overlay);
+      display: none;
+      z-index: 1100;
     }
 
-    .card {
+    .custom-modal {
       background: white;
-      padding: 15px;
-      margin-bottom: 10px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 30px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     }
 
-    .btn {
-      background: #3498db;
-      color: white;
+    /* --- FORM STYLES --- */
+    .login-card { width: 100%; max-width: 360px; padding: 40px; text-align: center; }
+    .input-group { margin-bottom: 20px; text-align: left; }
+    .input-group label { display: block; font-size: 0.85rem; margin-bottom: 8px; font-weight: 600; }
+    
+    select, input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    .btn-primary {
+      width: 100%; padding: 12px; background: var(--primary-color);
+      color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
+    }
+
+    .btn-secondary {
+      width: 100%; padding: 12px; background: #eee; color: #333;
+      border: none; border-radius: 8px; margin-top: 10px; cursor: pointer;
+    }
+
+    /* --- MAIN APP UI --- */
+    #main-content { display: none; }
+    nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; border-bottom: 1px solid #eee; }
+    .logo { display: flex; align-items: center; font-weight: 700; font-size: 1.2rem; }
+    .logo-icon { background: var(--primary-color); color: white; padding: 5px; border-radius: 6px; margin-right: 8px; }
+    
+    .hero {
+      height: 350px; margin: 20px 5%; border-radius: 16px; 
+      background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1200');
+      background-size: cover; background-position: center;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center;
+    }
+
+    .search-container {
+      width: 90%;
+      max-width: 500px;
+      margin-top: 20px;
+      position: relative;
+    }
+
+    .search-container input {
+      padding: 15px 20px 15px 45px;
+      border-radius: 30px;
       border: none;
-      cursor: pointer;
-      border-radius: 5px;
+      font-size: 1.1rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
 
-    .btn:hover {
-      background: #2980b9;
+    .search-icon {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #888;
+      font-size: 1.2rem;
+    }
+
+    .container { padding: 20px 5%; }
+    .locations-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
+    
+    .card { border-radius: 12px; overflow: hidden; border: 1px solid #eee; transition: 0.3s; }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+    .card-img { width: 100%; height: 180px; object-fit: cover; }
+    .card-body { padding: 15px; }
+    .card-meta { display: flex; gap: 15px; color: var(--primary-color); font-weight: 600; margin: 10px 0; font-size: 0.9rem;}
+    
+    .update-trigger {
+      width: 100%; padding: 10px; border: 1px solid var(--primary-color);
+      background: transparent; color: var(--primary-color); border-radius: 8px;
+      font-weight: 600; cursor: pointer;
     }
   </style>
 </head>
-
 <body>
 
-  <h1>📚 UBD Study Finder</h1>
-
-  <div class="filters">
-    <label>Noise:</label>
-    <select id="noise">
-      <option value="">All</option>
-      <option value="quiet">Quiet</option>
-      <option value="moderate">Moderate</option>
-      <option value="noisy">Noisy</option>
-    </select>
-
-    <label>Crowd:</label>
-    <select id="crowd">
-      <option value="">All</option>
-      <option value="low">Low</option>
-      <option value="medium">Medium</option>
-      <option value="high">High</option>
-    </select>
-
-    <button class="btn" onclick="loadLocations()">Filter</button>
+  <div id="login-overlay">
+    <div class="login-card">
+      <div class="logo" style="justify-content: center; margin-bottom: 20px;">
+        <span class="logo-icon">📖</span> StudySpot
+      </div>
+      <h2>Login</h2>
+      <div class="input-group">
+        <label>Username</label>
+        <input type="text" id="username" value="GohJL">
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="password" value="123456">
+      </div>
+      <button class="btn-primary" onclick="handleLogin()">Login</button>
+    </div>
   </div>
 
-  <div id="locations"></div>
+  <div id="modal-overlay">
+    <div class="custom-modal">
+      <h3 id="modal-title">Update Situation</h3>
+      <input type="hidden" id="current-loc-id">
+      
+      <div class="input-group">
+        <label>Noise Level</label>
+        <select id="update-noise">
+          <option value="Quiet">Quiet</option>
+          <option value="Moderate">Moderate</option>
+          <option value="Noisy">Noisy</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>Crowd Level</label>
+        <select id="update-crowd">
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+        </select>
+      </div>
+
+      <button class="btn-primary" onclick="saveStatus()">Save Updates</button>
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+
+  <div id="main-content">
+    <nav>
+      <div class="logo"><span class="logo-icon">📖</span> StudySpot</div>
+      <button onclick="location.reload()" style="cursor:pointer; border:none; background:none; color: var(--text-muted);">Logout</button>
+    </nav>
+
+    <div class="hero">
+      <h1 style="margin:0; font-size: 2.5rem;">Find Your Preferred Cafe</h1>
+      <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-bar" placeholder="Type cafe name or type..." onkeyup="handleSearch()">
+      </div>
+    </div>
+
+    <div class="container">
+      <h3 id="results-heading" style="margin-bottom: 20px;">⭐ Available Spots</h3>
+      <div id="locations" class="locations-grid"></div>
+    </div>
+  </div>
 
   <script>
-    const API = "/api/locations";
+    let locationsData = [
+      { id: 1, name: "FASS Lecture Hall 2.31", type: "Hall", noise: "Quiet", crowd: "Low", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=400" },
+      { id: 2, name: "PAPRSB IHS Study Room", type: "Library", noise: "Quiet", crowd: "Low", image: "https://images.unsplash.com/photo-1568667256549-094345857637?auto=format&fit=crop&w=400" },
+      { id: 3, name: "The Library Cafe", type: "Cafe", noise: "Moderate", crowd: "Medium", image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=400" },
+      { id: 4, name: "Roasted Sip (UBD)", type: "Cafe", noise: "Moderate", crowd: "High", image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=400" },
+      { id: 5, name: "The Energy Kitchen", type: "Cafe", noise: "Moderate", crowd: "Low", image: "https://images.unsplash.com/photo-1559925393-8be0ec41b501?auto=format&fit=crop&w=400" },
+      { id: 6, name: "Student Center Cafe", type: "Cafe", noise: "Noisy", crowd: "High", image: "https://images.unsplash.com/photo-1521017432521-f34f739b99b0?auto=format&fit=crop&w=400" }
+    ];
 
-    async function loadLocations() {
-      const res = await fetch(API);
-      let data = await res.json();
-
-      const noise = document.getElementById("noise").value;
-      const crowd = document.getElementById("crowd").value;
-
-      if (noise) {
-        data = data.filter(l => l.noise_level === noise);
+    function handleLogin() {
+      const u = document.getElementById("username").value;
+      const p = document.getElementById("password").value;
+      if(u === "GohJL" && p === "123456") {
+        document.getElementById("login-overlay").style.display = "none";
+        document.getElementById("main-content").style.display = "block";
+        render(locationsData);
       }
-
-      if (crowd) {
-        data = data.filter(l => l.crowd_level === crowd);
-      }
-
-      const container = document.getElementById("locations");
-      container.innerHTML = "";
-
-      data.forEach(loc => {
-        const div = document.createElement("div");
-        div.className = "card";
-
-        div.innerHTML = `
-          <h3>${loc.name}</h3>
-          <p>📍 Type: ${loc.location}</p>
-          <p>🔇 Noise: ${loc.noise_level}</p>
-          <p>👥 Crowd: ${loc.crowd_level}</p>
-          <p>🎯 Vibe: ${loc.vibe}</p>
-
-          <button class="btn" onclick="update(${loc.id})">
-            Update Info
-          </button>
-        `;
-
-        container.appendChild(div);
-      });
     }
 
-    async function update(id) {
-      const noise = prompt("Enter noise level (quiet/moderate/noisy):");
-      const crowd = prompt("Enter crowd level (low/medium/high):");
-
-      await fetch("/api/update", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          id,
-          noise_level: noise,
-          crowd_level: crowd
-        })
-      });
-
-      loadLocations();
+    // Updated render function to accept a specific data list
+    function render(dataList) {
+      const grid = document.getElementById("locations");
+      if(dataList.length === 0) {
+        grid.innerHTML = "<p style='color:#999; grid-column: 1/-1; text-align:center;'>No locations match your search.</p>";
+        return;
+      }
+      grid.innerHTML = dataList.map(loc => `
+        <div class="card">
+          <img src="${loc.image}" class="card-img">
+          <div class="card-body">
+            <h4 style="margin:0">${loc.name}</h4>
+            <p style="font-size:0.8rem; color:#888; margin:5px 0;">${loc.type}</p>
+            <div class="card-meta">
+              <span>🔊 ${loc.noise}</span>
+              <span>👥 ${loc.crowd}</span>
+            </div>
+            <button class="update-trigger" onclick="openModal(${loc.id}, '${loc.name}')">Update Status</button>
+          </div>
+        </div>
+      `).join('');
     }
 
-    loadLocations();
+    // Search Logic
+    function handleSearch() {
+      const query = document.getElementById("search-bar").value.toLowerCase();
+      const filtered = locationsData.filter(loc => 
+        loc.name.toLowerCase().includes(query) || 
+        loc.type.toLowerCase().includes(query)
+      );
+      
+      const heading = document.getElementById("results-heading");
+      heading.innerText = query ? `Search results for "${query}"` : "⭐ Available Spots";
+      
+      render(filtered);
+    }
+
+    function openModal(id, name) {
+      document.getElementById("modal-overlay").style.display = "flex";
+      document.getElementById("modal-title").innerText = "Update " + name;
+      document.getElementById("current-loc-id").value = id;
+    }
+
+    function closeModal() { document.getElementById("modal-overlay").style.display = "none"; }
+
+    function saveStatus() {
+      const id = parseInt(document.getElementById("current-loc-id").value);
+      const noise = document.getElementById("update-noise").value;
+      const crowd = document.getElementById("update-crowd").value;
+
+      locationsData = locationsData.map(loc => {
+        if(loc.id === id) return { ...loc, noise: noise, crowd: crowd };
+        return loc;
+      });
+
+      handleSearch(); // Maintain the current search filter after saving
+      closeModal();
+    }
   </script>
-
 </body>
 </html>
